@@ -1,10 +1,10 @@
-package com.tarunsmalviya.thread;
+package com.zenatix.thread;
 
-import com.tarunsmalviya.thread.resources.DfuResource;
-import com.tarunsmalviya.thread.resources.ImageResource;
-import com.tarunsmalviya.thread.resources.InitResource;
-import com.tarunsmalviya.thread.resources.TriggerResource;
-import com.tarunsmalviya.util.LoggerSingleton;
+import com.zenatix.thread.resources.DfuResource;
+import com.zenatix.thread.resources.ImageResource;
+import com.zenatix.thread.resources.InitResource;
+import com.zenatix.thread.resources.TriggerResource;
+import com.zenatix.util.LoggerSingleton;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.CoapEndpoint;
 import org.eclipse.californium.core.network.EndpointManager;
@@ -20,7 +20,7 @@ public class ThreadDfuServer extends CoapServer {
     private static final int COAP_PORT = NetworkConfig.getStandard().getInt(NetworkConfig.Keys.COAP_PORT);
 
     /**
-     * Constructor in which, {@link com.tarunsmalviya.thread.resources} resources and endpoints of the server are initialized.
+     * Constructor in which, {@link com.zenatix.thread.resources} resources and endpoints of the server are initialized.
      *
      * @throws SocketException
      */

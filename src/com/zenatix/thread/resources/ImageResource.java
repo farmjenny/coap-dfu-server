@@ -1,30 +1,24 @@
-package com.tarunsmalviya.thread.resources;
+package com.zenatix.thread.resources;
 
-import com.tarunsmalviya.thread.ThreadFirmware;
-import com.tarunsmalviya.util.CommonMethod;
-import com.tarunsmalviya.util.Constant;
-import com.tarunsmalviya.util.LoggerSingleton;
+
+import com.zenatix.thread.ThreadFirmware;
+import com.zenatix.util.CommonMethod;
+import com.zenatix.util.Constant;
+import com.zenatix.util.LoggerSingleton;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.json.JSONObject;
 
-import java.nio.ByteBuffer;
-import java.util.HashMap;
+public class ImageResource extends CoapResource {
 
-public class TriggerResource extends CoapResource {
+    private static final String NAME = "f";
 
-    private static final String NAME = "t";
-
-    private HashMap<String, Byte> data;
-
-    public TriggerResource() {
+    public ImageResource() {
         super(NAME);
-        getAttributes().setTitle("t/ resource registered for GET request");
+        getAttributes().setTitle("f/ resource registered for GET request");
 
-        LoggerSingleton.getInstance().info("t/ resource registered for GET request");
-
-        data = new HashMap<>();
+        LoggerSingleton.getInstance().info("f/ resource registered for GET request");
     }
 
     @Override
@@ -48,25 +42,12 @@ public class TriggerResource extends CoapResource {
                     if (payload == null)
                         throw new Exception("Payload is empty.");
 
-                    byte[] dat = ThreadFirmware.getFirmware(payload, Constant.EXTENSION_DAT);
                     byte[] bin = ThreadFirmware.getFirmware(payload, Constant.EXTENSION_BIN);
+                    if (bin == null)
+                        throw new Exception("No firmware file found corresponding to name: " + payload + Constant.EXTENSION_BIN);
 
-                    if (dat == null || bin == null)
-                        throw new Exception("No firmware file found corresponding to name: " + payload);
-
-                    ByteBuffer buffer = ByteBuffer.allocate(Character.BYTES + (4 * Integer.BYTES));
-                    buffer.putChar((char) (1 << 4));
-                    buffer.putInt(dat.length);
-                    buffer.putInt(CommonMethod.getCrc(dat));
-                    buffer.putInt(bin.length);
-                    buffer.putInt(CommonMethod.getCrc(bin));
-
-                    String response = CommonMethod.bytesToHexString(buffer.array());
-                    response = response.replaceFirst("^0+(?!$)", "");
-
-                    byte[] responsePayload = CommonMethod.hexStringToByteArray(response);
-                    log.put("Status", "Response sent: " + responsePayload);
-                    exchange.respond(CoAP.ResponseCode.CONTENT, responsePayload);
+                    log.put("Status", "Response sent: " + payload + Constant.EXTENSION_BIN + " file content.");
+                    exchange.respond(CoAP.ResponseCode.CONTENT, bin);
                 }
             }
         } catch (Exception e) {

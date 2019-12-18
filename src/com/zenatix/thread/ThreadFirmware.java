@@ -1,9 +1,7 @@
-package com.tarunsmalviya.thread;
+package com.zenatix.thread;
 
-import com.tarunsmalviya.util.CommonMethod;
-import com.tarunsmalviya.util.Constant;
-import com.tarunsmalviya.util.LoggerSingleton;
-import org.eclipse.californium.core.coap.CoAP;
+import com.zenatix.util.Constant;
+import com.zenatix.util.LoggerSingleton;
 
 import java.io.File;
 import java.io.FileNotFoundException;

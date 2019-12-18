@@ -1,4 +1,4 @@
-package com.tarunsmalviya.util;
+package com.zenatix.util;
 
 
 import org.eclipse.californium.core.server.resources.CoapExchange;

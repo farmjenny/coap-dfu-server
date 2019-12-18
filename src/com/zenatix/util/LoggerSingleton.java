@@ -1,4 +1,4 @@
-package com.tarunsmalviya.util;
+package com.zenatix.util;
 
 import java.io.File;
 import java.util.logging.FileHandler;

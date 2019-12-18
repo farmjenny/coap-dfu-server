@@ -1,24 +1,23 @@
-package com.tarunsmalviya.thread.resources;
+package com.zenatix.thread.resources;
 
 
-import com.tarunsmalviya.thread.ThreadFirmware;
-import com.tarunsmalviya.util.CommonMethod;
-import com.tarunsmalviya.util.Constant;
-import com.tarunsmalviya.util.LoggerSingleton;
+import com.zenatix.thread.ThreadFirmware;
+import com.zenatix.util.CommonMethod;
+import com.zenatix.util.LoggerSingleton;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.json.JSONObject;
 
-public class ImageResource extends CoapResource {
+public class DfuResource extends CoapResource {
 
-    private static final String NAME = "f";
+    private static final String NAME = "dfu";
 
-    public ImageResource() {
+    public DfuResource() {
         super(NAME);
-        getAttributes().setTitle("f/ resource registered for GET request");
+        getAttributes().setTitle("dfu/ resource registered for GET request");
 
-        LoggerSingleton.getInstance().info("f/ resource registered for GET request");
+        LoggerSingleton.getInstance().info("dfu/ resource registered for GET request");
     }
 
     @Override
@@ -42,12 +41,9 @@ public class ImageResource extends CoapResource {
                     if (payload == null)
                         throw new Exception("Payload is empty.");
 
-                    byte[] bin = ThreadFirmware.getFirmware(payload, Constant.EXTENSION_BIN);
-                    if (bin == null)
-                        throw new Exception("No firmware file found corresponding to name: " + payload + Constant.EXTENSION_BIN);
-
-                    log.put("Status", "Response sent: " + payload + Constant.EXTENSION_BIN + " file content.");
-                    exchange.respond(CoAP.ResponseCode.CONTENT, bin);
+                    String responsePayload = ThreadFirmware.isNewFirmwareAvailable(payload);
+                    log.put("Status", "Response sent: " + responsePayload);
+                    exchange.respond(CoAP.ResponseCode.CONTENT, responsePayload);
                 }
             }
         } catch (Exception e) {

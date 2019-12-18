@@ -1,24 +1,30 @@
-package com.tarunsmalviya.thread.resources;
+package com.zenatix.thread.resources;
 
-import com.tarunsmalviya.thread.ThreadFirmware;
-import com.tarunsmalviya.util.CommonMethod;
-import com.tarunsmalviya.util.Constant;
-import com.tarunsmalviya.util.LoggerSingleton;
+import com.zenatix.thread.ThreadFirmware;
+import com.zenatix.util.CommonMethod;
+import com.zenatix.util.Constant;
+import com.zenatix.util.LoggerSingleton;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.json.JSONObject;
 
+import java.nio.ByteBuffer;
+import java.util.HashMap;
 
-public class InitResource extends CoapResource {
+public class TriggerResource extends CoapResource {
 
-    private static final String NAME = "i";
+    private static final String NAME = "t";
 
-    public InitResource() {
+    private HashMap<String, Byte> data;
+
+    public TriggerResource() {
         super(NAME);
-        getAttributes().setTitle("i/ resource registered for GET request");
+        getAttributes().setTitle("t/ resource registered for GET request");
 
-        LoggerSingleton.getInstance().info("i/ resource registered for GET request");
+        LoggerSingleton.getInstance().info("t/ resource registered for GET request");
+
+        data = new HashMap<>();
     }
 
     @Override
@@ -34,7 +40,6 @@ public class InitResource extends CoapResource {
     @Override
     public void handleGET(CoapExchange exchange) {
         JSONObject log = CommonMethod.buildCoapPacketJsonLog(NAME, exchange);
-
         try {
             if (exchange != null) {
                 CoAP.Type type = exchange.advanced().getRequest().getType();
@@ -44,11 +49,24 @@ public class InitResource extends CoapResource {
                         throw new Exception("Payload is empty.");
 
                     byte[] dat = ThreadFirmware.getFirmware(payload, Constant.EXTENSION_DAT);
-                    if (dat == null)
-                        throw new Exception("No firmware file found corresponding to name: " + payload + Constant.EXTENSION_DAT);
+                    byte[] bin = ThreadFirmware.getFirmware(payload, Constant.EXTENSION_BIN);
 
-                    log.put("Status", "Response sent: " + payload + Constant.EXTENSION_DAT + " file content.");
-                    exchange.respond(CoAP.ResponseCode.CONTENT, dat);
+                    if (dat == null || bin == null)
+                        throw new Exception("No firmware file found corresponding to name: " + payload);
+
+                    ByteBuffer buffer = ByteBuffer.allocate(Character.BYTES + (4 * Integer.BYTES));
+                    buffer.putChar((char) (1 << 4));
+                    buffer.putInt(dat.length);
+                    buffer.putInt(CommonMethod.getCrc(dat));
+                    buffer.putInt(bin.length);
+                    buffer.putInt(CommonMethod.getCrc(bin));
+
+                    String response = CommonMethod.bytesToHexString(buffer.array());
+                    response = response.replaceFirst("^0+(?!$)", "");
+
+                    byte[] responsePayload = CommonMethod.hexStringToByteArray(response);
+                    log.put("Status", "Response sent: " + responsePayload);
+                    exchange.respond(CoAP.ResponseCode.CONTENT, responsePayload);
                 }
             }
         } catch (Exception e) {
@@ -58,7 +76,7 @@ public class InitResource extends CoapResource {
                 exchange.respond(CoAP.ResponseCode.BAD_REQUEST, e.getMessage());
         }
 
-        LoggerSingleton.getInstance().info(CommonMethod.buildCoapPacketJsonLog(NAME, exchange).toString());
+        LoggerSingleton.getInstance().info(log.toString());
     }
 
     @Override

@@ -1,23 +1,24 @@
-package com.tarunsmalviya.thread.resources;
+package com.zenatix.thread.resources;
 
-
-import com.tarunsmalviya.thread.ThreadFirmware;
-import com.tarunsmalviya.util.CommonMethod;
-import com.tarunsmalviya.util.LoggerSingleton;
+import com.zenatix.thread.ThreadFirmware;
+import com.zenatix.util.CommonMethod;
+import com.zenatix.util.Constant;
+import com.zenatix.util.LoggerSingleton;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.json.JSONObject;
 
-public class DfuResource extends CoapResource {
 
-    private static final String NAME = "dfu";
+public class InitResource extends CoapResource {
 
-    public DfuResource() {
+    private static final String NAME = "i";
+
+    public InitResource() {
         super(NAME);
-        getAttributes().setTitle("dfu/ resource registered for GET request");
+        getAttributes().setTitle("i/ resource registered for GET request");
 
-        LoggerSingleton.getInstance().info("dfu/ resource registered for GET request");
+        LoggerSingleton.getInstance().info("i/ resource registered for GET request");
     }
 
     @Override
@@ -33,6 +34,7 @@ public class DfuResource extends CoapResource {
     @Override
     public void handleGET(CoapExchange exchange) {
         JSONObject log = CommonMethod.buildCoapPacketJsonLog(NAME, exchange);
+
         try {
             if (exchange != null) {
                 CoAP.Type type = exchange.advanced().getRequest().getType();
@@ -41,9 +43,12 @@ public class DfuResource extends CoapResource {
                     if (payload == null)
                         throw new Exception("Payload is empty.");
 
-                    String responsePayload = ThreadFirmware.isNewFirmwareAvailable(payload);
-                    log.put("Status", "Response sent: " + responsePayload);
-                    exchange.respond(CoAP.ResponseCode.CONTENT, responsePayload);
+                    byte[] dat = ThreadFirmware.getFirmware(payload, Constant.EXTENSION_DAT);
+                    if (dat == null)
+                        throw new Exception("No firmware file found corresponding to name: " + payload + Constant.EXTENSION_DAT);
+
+                    log.put("Status", "Response sent: " + payload + Constant.EXTENSION_DAT + " file content.");
+                    exchange.respond(CoAP.ResponseCode.CONTENT, dat);
                 }
             }
         } catch (Exception e) {
@@ -53,7 +58,7 @@ public class DfuResource extends CoapResource {
                 exchange.respond(CoAP.ResponseCode.BAD_REQUEST, e.getMessage());
         }
 
-        LoggerSingleton.getInstance().info(log.toString());
+        LoggerSingleton.getInstance().info(CommonMethod.buildCoapPacketJsonLog(NAME, exchange).toString());
     }
 
     @Override

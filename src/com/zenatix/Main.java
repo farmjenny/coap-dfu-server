@@ -1,7 +1,7 @@
-package com.tarunsmalviya;
+package com.zenatix;
 
-import com.tarunsmalviya.thread.ThreadDfuServer;
-import com.tarunsmalviya.util.LoggerSingleton;
+import com.zenatix.thread.ThreadDfuServer;
+import com.zenatix.util.LoggerSingleton;
 
 import java.net.SocketException;
 

@@ -1,4 +1,4 @@
-package com.tarunsmalviya.util;
+package com.zenatix.util;
 
 public class Constant {
 
