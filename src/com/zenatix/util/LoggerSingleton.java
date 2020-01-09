@@ -22,7 +22,7 @@ public class LoggerSingleton {
                 logDir.mkdir();
 
             logger = Logger.getLogger("DfuServer");
-            logger.addHandler(new FileHandler(Constant.LOG_FILE_PATH + Constant.LOG_FILE_NAME, Constant.MAX_LOG_FILE_SIZE, Constant.MAX_LOG_FILE_COUNT, true));
+            logger.addHandler(new FileHandler(Constant.LOG_FILE_NAME, Constant.MAX_LOG_FILE_SIZE, Constant.MAX_LOG_FILE_COUNT, true));
         } catch (Exception e) {
             e.printStackTrace();
         }

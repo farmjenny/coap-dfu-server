@@ -14,6 +14,7 @@ public class Main {
             dfuServer.start();
             LoggerSingleton.getInstance().info("Thread DFU Server started...");
         } catch (SocketException e) {
+            e.printStackTrace();
             LoggerSingleton.getInstance().severe("Failed to initialize thread dfu server: " + e.getStackTrace());
         }
     }

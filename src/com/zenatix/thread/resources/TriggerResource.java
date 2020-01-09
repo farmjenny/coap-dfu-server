@@ -70,6 +70,7 @@ public class TriggerResource extends CoapResource {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             log.put("Status", e.getMessage());
 
             if (exchange != null)

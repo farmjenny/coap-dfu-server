@@ -17,7 +17,7 @@ import java.net.SocketException;
 
 public class ThreadDfuServer extends CoapServer {
 
-    private static final int COAP_PORT = NetworkConfig.getStandard().getInt(NetworkConfig.Keys.COAP_PORT);
+    private static final int COAP_PORT = NetworkConfig.getStandard().getInt(NetworkConfig.Keys.COAP_PORT) + 1;
 
     /**
      * Constructor in which, {@link com.zenatix.thread.resources} resources and endpoints of the server are initialized.
@@ -43,6 +43,7 @@ public class ThreadDfuServer extends CoapServer {
         for (InetAddress addr : EndpointManager.getEndpointManager().getNetworkInterfaces()) {
             // Only binds to IPv4 addresses and localhost
             if (addr instanceof Inet4Address || addr.isLoopbackAddress()) {
+                System.out.println(addr.toString());
                 InetSocketAddress bindToAddress = new InetSocketAddress(addr, COAP_PORT);
                 CoapEndpoint endpoint = new CoapEndpoint.Builder()
                         .setInetSocketAddress(bindToAddress)

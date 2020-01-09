@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Main-Class: com.zenatix.Main
+Class-Path: californium-core-2.0.0.jar element-connector-2.0.0.jar slf4j
+ -api-1.7.25.jar json-20190722.jar
+
