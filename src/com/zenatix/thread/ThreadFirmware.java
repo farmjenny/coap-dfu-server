@@ -2,11 +2,13 @@ package com.zenatix.thread;
 
 import com.zenatix.util.Constant;
 import com.zenatix.util.LoggerSingleton;
+import org.eclipse.californium.core.network.config.NetworkConfig;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,13 +16,17 @@ import java.util.HashMap;
 public class ThreadFirmware {
     private static HashMap<String, byte[]> FILE_MAP;
 
+    private static final String FIRMWARE_PATH_CONFIG = "THREAD_FIRMWARE_FOLDER_PATH";
+
     private ThreadFirmware() {
     }
 
     private static ArrayList<String> getFirmwareList() {
         ArrayList<String> firmware = new ArrayList<>();
 
-        File folder = new File(Constant.THREAD_FIRMWARE_FOLDER_PATH);
+        String firmwarePath = NetworkConfig.getStandard().getString(ThreadFirmware.FIRMWARE_PATH_CONFIG, Constant.THREAD_FIRMWARE_FOLDER_PATH);
+
+        File folder = new File(firmwarePath);
         File[] listOfFiles = folder.listFiles();
         for (File file : listOfFiles) {
             if (file.isFile())
@@ -36,9 +42,16 @@ public class ThreadFirmware {
 
         byte[] data = FILE_MAP.get(name + extension);
         if (data == null) {
-            String path = getFirmwareFilePath(name, extension);
-            if ((new File(path)).exists()) {
-                data = Files.readAllBytes(Paths.get(path));
+            File path = getFirmwareFilePath(name, extension);
+            final String FW_PATH = NetworkConfig.getStandard().getString(ThreadFirmware.FIRMWARE_PATH_CONFIG, Constant.THREAD_FIRMWARE_FOLDER_PATH);
+
+            // Check for path traversal
+            if (!path.getCanonicalPath().startsWith(FW_PATH)) {
+                LoggerSingleton.getInstance().severe("Invalid path specified: " + path);
+                throw new FileNotFoundException("Bad File.");
+            }
+            if (path.exists()) {
+                data = Files.readAllBytes(Paths.get(path.toURI()));
                 FILE_MAP.put(name + extension, data);
             } else {
                 LoggerSingleton.getInstance().severe("No such file " + path + " exists.");
@@ -49,8 +62,11 @@ public class ThreadFirmware {
         return data;
     }
 
-    public static String getFirmwareFilePath(String name, String extension) {
-        return Constant.THREAD_FIRMWARE_FOLDER_PATH + name + extension;
+    public static File getFirmwareFilePath(String name, String extension) {
+        String firmwarePath = NetworkConfig.getStandard().getString(ThreadFirmware.FIRMWARE_PATH_CONFIG, Constant.THREAD_FIRMWARE_FOLDER_PATH);
+        // Normalize path to prevent path traversal
+        Path p = Paths.get(firmwarePath, name + extension).normalize();
+        return p.toFile();
     }
 
     public static String isNewFirmwareAvailable(String existingFirmware) throws Exception {
