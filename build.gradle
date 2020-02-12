@@ -1,0 +1,32 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'application'
+
+
+group = 'groupId'
+version = '1.0-SNAPSHOT'
+
+description = """"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+sourceSets {
+    main {
+         java {
+            srcDirs = ['src']
+         }
+    }
+}
+repositories {
+     maven { url "https://repo.maven.apache.org/maven2" }
+}
+dependencies {
+    compile group: 'org.eclipse.californium', name: 'californium-core', version:'2.0.0'
+    compile group: 'org.json', name: 'json', version:'20190722'
+}
+
+
+application {
+    mainClassName = 'com.zenatix.Main'
+}
+
