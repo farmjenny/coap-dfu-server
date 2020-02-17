@@ -35,17 +35,12 @@ public class DfuResource extends CoapResource {
         JSONObject log = CommonMethod.buildCoapPacketJsonLog(NAME, exchange);
         try {
             if (exchange != null) {
-                CoAP.Type type = exchange.advanced().getRequest().getType();
-                if (type == CoAP.Type.CON) {
-                    String payload = exchange.getRequestText();
-                    if (payload == null)
-                        throw new Exception("Payload is empty.");
+                String payload = exchange.getRequestText();
+                if (payload == null)
+                    throw new Exception("Payload is empty.");
 
-                    String responsePayload = ThreadFirmware.isNewFirmwareAvailable(payload);
-                    System.out.println(responsePayload);
-                    log.put("Status", "Response sent: " + responsePayload);
-                    exchange.respond(CoAP.ResponseCode.CONTENT, responsePayload);
-                }
+                String responsePayload = ThreadFirmware.isNewFirmwareAvailable(payload);
+                exchange.respond(CoAP.ResponseCode.CONTENT, responsePayload);
             }
         } catch (Exception e) {
             log.put("Status", e.getMessage());
