@@ -4,7 +4,7 @@ apply plugin: 'application'
 
 version = '1.0'
 
-description = """"""
+description = "CoAP DFU Server"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -22,7 +22,6 @@ dependencies {
     compile group: 'org.eclipse.californium', name: 'californium-core', version:'2.1.0-RC1'
     compile group: 'org.json', name: 'json', version:'20190722'
 }
-
 
 application {
     mainClassName = 'com.zenatix.Main'
