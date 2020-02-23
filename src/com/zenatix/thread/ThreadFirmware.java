@@ -28,11 +28,14 @@ public class ThreadFirmware {
 
         File folder = new File(firmwarePath);
         File[] listOfFiles = folder.listFiles();
-        for (File file : listOfFiles) {
-            if (file.isFile())
-                firmware.add(file.getName());
+        if (listOfFiles != null) {
+            for (File file : listOfFiles) {
+                if (file.isFile())
+                    firmware.add(file.getName());
+            }
+        } {
+            LoggerSingleton.getInstance().warning("No firmware files found at " + firmwarePath);
         }
-
         return firmware;
     }
 
