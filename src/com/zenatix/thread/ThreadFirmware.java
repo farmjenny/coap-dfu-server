@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class ThreadFirmware {
@@ -24,18 +25,38 @@ public class ThreadFirmware {
     private static ArrayList<String> getFirmwareList() {
         ArrayList<String> firmware = new ArrayList<>();
 
-        String firmwarePath = NetworkConfig.getStandard().getString(ThreadFirmware.FIRMWARE_PATH_CONFIG, Constant.THREAD_FIRMWARE_FOLDER_PATH);
+        String firmwarePath = NetworkConfig.getStandard().getString(ThreadFirmware.FIRMWARE_PATH_CONFIG,
+                Constant.THREAD_FIRMWARE_FOLDER_PATH);
 
         File folder = new File(firmwarePath);
         File[] listOfFiles = folder.listFiles();
         if (listOfFiles != null) {
             for (File file : listOfFiles) {
-                if (file.isFile())
+                if (file.isFile()) {
                     firmware.add(file.getName());
+                }
             }
-        } {
+        } else {
             LoggerSingleton.getInstance().warning("No firmware files found at " + firmwarePath);
         }
+
+        // Sort firmware filename by the last segment of the name descending (which should be numeric)
+        Collections.sort(firmware, (String s1, String s2) -> {
+            String s1Parts[] = s1.split("\\.");
+            String s2Parts[] = s2.split("\\.");
+            if (s1Parts.length == 5 && s2Parts.length == 5) {
+                try {
+                    Long ver1 = Long.valueOf(s1Parts[3]);
+                    Long ver2 = Long.valueOf(s2Parts[3]);
+                    return ver2.compareTo(ver1);
+                } catch (NumberFormatException e) {
+                    return s2Parts[3].compareTo(s1Parts[3]);
+                }
+            } else {
+                return s2.compareTo(s1);
+            }
+        });
+
         return firmware;
     }
 
@@ -46,7 +67,8 @@ public class ThreadFirmware {
         byte[] data = FILE_MAP.get(name + extension);
         if (data == null) {
             File path = getFirmwareFilePath(name, extension);
-            final String FW_PATH = NetworkConfig.getStandard().getString(ThreadFirmware.FIRMWARE_PATH_CONFIG, Constant.THREAD_FIRMWARE_FOLDER_PATH);
+            final String FW_PATH = NetworkConfig.getStandard().getString(ThreadFirmware.FIRMWARE_PATH_CONFIG,
+                    Constant.THREAD_FIRMWARE_FOLDER_PATH);
 
             // Check for path traversal
             if (!path.getCanonicalPath().startsWith(FW_PATH)) {
@@ -66,7 +88,8 @@ public class ThreadFirmware {
     }
 
     public static File getFirmwareFilePath(String name, String extension) {
-        String firmwarePath = NetworkConfig.getStandard().getString(ThreadFirmware.FIRMWARE_PATH_CONFIG, Constant.THREAD_FIRMWARE_FOLDER_PATH);
+        String firmwarePath = NetworkConfig.getStandard().getString(ThreadFirmware.FIRMWARE_PATH_CONFIG,
+                Constant.THREAD_FIRMWARE_FOLDER_PATH);
         // Normalize path to prevent path traversal
         Path p = Paths.get(firmwarePath, name + extension).normalize();
         return p.toFile();
@@ -75,8 +98,8 @@ public class ThreadFirmware {
     public static String isNewFirmwareAvailable(String existingFirmware) throws Exception {
         String arr[] = existingFirmware.split("\\.");
         if (arr.length != 4)
-            throw new Exception("Invalid existing firmware. Valid format is <NetworkName>.<DeviceType>.<Category>.<FirmwareNumber>");
-
+            throw new Exception(
+                    "Invalid existing firmware. Valid format is <NetworkName>.<DeviceType>.<Category>.<FirmwareNumber>");
 
         ArrayList<String> firmwareList = getFirmwareList();
         String matchedDatName = null, matchedBinName = null;
