@@ -42,32 +42,29 @@ public class TriggerResource extends CoapResource {
         JSONObject log = CommonMethod.buildCoapPacketJsonLog(NAME, exchange);
         try {
             if (exchange != null) {
-                CoAP.Type type = exchange.advanced().getRequest().getType();
-                if (type == CoAP.Type.CON) {
-                    String payload = exchange.getRequestText();
-                    if (payload == null)
-                        throw new Exception("Payload is empty.");
+                String payload = exchange.getRequestText();
+                if (payload == null)
+                    throw new Exception("Payload is empty.");
 
-                    byte[] dat = ThreadFirmware.getFirmware(payload, Constant.EXTENSION_DAT);
-                    byte[] bin = ThreadFirmware.getFirmware(payload, Constant.EXTENSION_BIN);
+                byte[] dat = ThreadFirmware.getFirmware(payload, Constant.EXTENSION_DAT);
+                byte[] bin = ThreadFirmware.getFirmware(payload, Constant.EXTENSION_BIN);
 
-                    if (dat == null || bin == null)
-                        throw new Exception("No firmware file found corresponding to name: " + payload);
+                if (dat == null || bin == null)
+                    throw new Exception("No firmware file found corresponding to name: " + payload);
 
-                    ByteBuffer buffer = ByteBuffer.allocate(Character.BYTES + (4 * Integer.BYTES));
-                    buffer.putChar((char) (1 << 4));
-                    buffer.putInt(dat.length);
-                    buffer.putInt(CommonMethod.getCrc(dat));
-                    buffer.putInt(bin.length);
-                    buffer.putInt(CommonMethod.getCrc(bin));
+                ByteBuffer buffer = ByteBuffer.allocate(Character.BYTES + (4 * Integer.BYTES));
+                buffer.putChar((char) (1 << 4));
+                buffer.putInt(dat.length);
+                buffer.putInt(CommonMethod.getCrc(dat));
+                buffer.putInt(bin.length);
+                buffer.putInt(CommonMethod.getCrc(bin));
 
-                    String response = CommonMethod.bytesToHexString(buffer.array());
-                    response = response.replaceFirst("^0+(?!$)", "");
+                String response = CommonMethod.bytesToHexString(buffer.array());
+                response = response.replaceFirst("^0+(?!$)", "");
 
-                    byte[] responsePayload = CommonMethod.hexStringToByteArray(response);
-                    log.put("Status", "Response sent: " + responsePayload);
-                    exchange.respond(CoAP.ResponseCode.CONTENT, responsePayload);
-                }
+                byte[] responsePayload = CommonMethod.hexStringToByteArray(response);
+                log.put("Status", "Response sent: " + responsePayload);
+                exchange.respond(CoAP.ResponseCode.CONTENT, responsePayload);
             }
         } catch (Exception e) {
             e.printStackTrace();

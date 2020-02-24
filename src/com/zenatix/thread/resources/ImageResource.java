@@ -1,6 +1,5 @@
 package com.zenatix.thread.resources;
 
-
 import com.zenatix.thread.ThreadFirmware;
 import com.zenatix.util.CommonMethod;
 import com.zenatix.util.Constant;
@@ -36,19 +35,18 @@ public class ImageResource extends CoapResource {
         JSONObject log = CommonMethod.buildCoapPacketJsonLog(NAME, exchange);
         try {
             if (exchange != null) {
-                CoAP.Type type = exchange.advanced().getRequest().getType();
-                if (type == CoAP.Type.CON) {
-                    String payload = exchange.getRequestText();
-                    if (payload == null)
-                        throw new Exception("Payload is empty.");
+                String payload = exchange.getRequestText();
+                if (payload == null)
+                    throw new Exception("Payload is empty.");
 
-                    byte[] bin = ThreadFirmware.getFirmware(payload, Constant.EXTENSION_BIN);
-                    if (bin == null)
-                        throw new Exception("No firmware file found corresponding to name: " + payload + Constant.EXTENSION_BIN);
+                byte[] bin = ThreadFirmware.getFirmware(payload, Constant.EXTENSION_BIN);
+                if (bin == null)
+                    throw new Exception(
+                            "No firmware file found corresponding to name: " + payload + Constant.EXTENSION_BIN);
 
-                    log.put("Status", "Response sent: " + payload + Constant.EXTENSION_BIN + " file content.");
-                    exchange.respond(CoAP.ResponseCode.CONTENT, bin);
-                }
+                log.put("Status", "Response sent: " + payload + Constant.EXTENSION_BIN + " file content.");
+                exchange.respond(CoAP.ResponseCode.CONTENT, bin);
+
             }
         } catch (Exception e) {
             log.put("Status", e.getMessage());
