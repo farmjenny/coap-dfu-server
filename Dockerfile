@@ -1,4 +1,12 @@
+FROM gradle:jdk10 as builder
+COPY --chown=gradle:gradle . /home/gradle/dfu-srv
+WORKDIR /home/gradle/dfu-srv
+RUN gradle --no-daemon distTar
+
 FROM adoptopenjdk:8-jdk-hotspot
-COPY Californium.properties build/libs/coap-dfu-server-1.0.jar build/install/coap-dfu-server/lib/*.jar /home/root/java/
+COPY --from=builder /home/gradle/dfu-srv/build/distributions/dfu-srv*.tar /home/root/java/
 WORKDIR /home/root/java
-ENTRYPOINT ["java", "-cp", "./californium-core-2.1.0-RC1.jar:./coap-dfu-server-1.0.jar:./element-connector-2.1.0-RC1.jar:./json-20190722.jar:./slf4j-api-1.7.25.jar", "com.zenatix.Main", "main"]
+RUN tar -xvf dfu-srv*.tar
+WORKDIR /home/root/java/dfu-srv-1.0
+COPY --from=builder /home/gradle/dfu-srv/Californium.properties .
+CMD bin/dfu-srv
