@@ -9,4 +9,4 @@
 
 * Compile project:  `gradle build`
 * Run server: `gradle run`
-* Build Docker image: `gradle installDist && docker build -t coap-dfu-server .`
+* Build Docker image: `docker build -t coap-dfu-server .`
